@@ -1,0 +1,35 @@
+---
+title: "week_3_activities"
+output: html_document
+date: "2024-02-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+### Exercise 1:
+
+##### loading in data
+```{r}
+whas100 = read_csv("data/whas100.csv")
+```
+
+### Part A: Take the WHAS100 dataset, create a binary variable ‘losbin’ based on length of hospital stay such that 0: los ≤ 5 and 1: los > 5.
+
+##### creating a binary variable losbin using a binary operator
+```{r}
+whas100$losbin = 1*(whas100$los>5)
+```
+
+### Part B: Test whether the survival curves for the two groups defined by ‘losbin’ are the same using the log-rank test at α = 0.05. Give the null and alternative hypothesis, test statistic, degrees of freedom, p-value, and conclusion
+
+##### testing survival curves using log rank
+```{r}
+library(survival)
+
+print(survdiff(Surv(lenfol, fstat)~losbin, data = whas100), digits = 5)
+```
+
