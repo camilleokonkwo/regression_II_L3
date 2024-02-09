@@ -1,6 +1,6 @@
 ---
 title: "week_3_activities"
-output: html_document
+output: github_document
 date: "2024-02-09"
 ---
 
@@ -32,4 +32,24 @@ library(survival)
 
 print(survdiff(Surv(lenfol, fstat)~losbin, data = whas100), digits = 5)
 ```
+
+
+#### Our hypotheses:
+
+* H0 :Slos≤5(t) = Slos>5(t), for all t ≤ τ
+* Hα :Slos≤5(t) = / = Slos>5(t), for some t ≤ τ
+
+#### Test statistic:
+
+* Q_log-rank = 0.2262
+
+#### Degree of freedom: 
+* df = 1
+
+#### P-value: 
+* Pr(χ21 ≥ 0.2262) = 0.634 > 0.05
+
+#### Conclusion: 
+
+We fail to reject H0 at the significance level 0.05. The survival curves for patients stay in hospital for 5 days or less and patients there for more than 5 days are not significantly different at the 5% level.
 
