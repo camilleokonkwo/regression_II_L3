@@ -21,42 +21,38 @@ treatment groups in the myelomatosis example in this week’s lecture notes. Com
 ```{r}
 library(survival)
 
-# Create a survival object
-myelomatosis <- data.frame(
-  OBS = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25),
+# create dataset
+myelomatosis = data.frame(
+  OBS = c(1:25),
   DUR = c(8, 180, 632, 852, 52, 2240, 220, 63, 195, 76, 70, 8, 13, 1990, 1976, 18, 700, 1296, 1460, 210, 63, 1328, 1296, 365, 23),
   STATUS = c(1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1),
-  TREAT = c(1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1),
-  RENAL = c(1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1)
+  TREAT = c(1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0)
 )
 
-# Create a survival object
-surv_object <- with(myelomatosis, Surv(DUR, STATUS))
-
-# Fit the survival curves and perform log-rank test
-surv_fit <- survfit(surv_object ~ TREAT, data = myelomatosis)
-log_rank_test <- survdiff(surv_object ~ TREAT, data = myelomatosis)
-print(log_rank_test)
-print(surv_fit)
+head(myelomatosis)
 ```
 
 ```{r}
+#log-rank test
 print(survdiff(Surv(DUR, STATUS)~TREAT, data = myelomatosis),
 digits=5)
+
+library(ggsurvfit)
+
+#plot
+survfit2(Surv(DUR, STATUS)~TREAT, data = myelomatosis) |> 
+  ggsurvfit() +
+  add_censor_mark() +
+  add_pvalue(location = "annotation", 
+             caption = "Log-rank {p.value}")
 ```
 
 ```{r}
-library(survival)
-fit = survfit(Surv(DUR, STATUS)~1, data = myelomatosis,
-conf.type="log-log")
-summary(fit)
-library(ggsurvfit)
-survfit2(Surv(DUR, STATUS)~1, data = myelomatosis,
-conf.type="log-log") |>
-ggsurvfit() +
-add_confidence_interval()
-quantile(fit, probs=c(.25,.5,.75), conf.int=T)
+#K-M table
 
+km_table = survfit(Surv(DUR, STATUS) ~ TREAT, data = myelomatosis, conf.type = "log-log")
+
+summary(km_table)
 ```
 
 2a.	Generate a graph of the survival functions in the two hormone therapy groups using `hwdata1`. Interpret the graph. (hint: What do you observe on the difference of the survival functions between the two groups?)

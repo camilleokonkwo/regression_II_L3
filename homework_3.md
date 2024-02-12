@@ -27,44 +27,27 @@ hwdata1 = read_csv("data/hwdata1.csv")
 ``` r
 library(survival)
 
-# Create a survival object
-myelomatosis <- data.frame(
-  OBS = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25),
+# create dataset
+myelomatosis = data.frame(
+  OBS = c(1:25),
   DUR = c(8, 180, 632, 852, 52, 2240, 220, 63, 195, 76, 70, 8, 13, 1990, 1976, 18, 700, 1296, 1460, 210, 63, 1328, 1296, 365, 23),
   STATUS = c(1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1),
-  TREAT = c(1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1),
-  RENAL = c(1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1)
+  TREAT = c(1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0)
 )
 
-# Create a survival object
-surv_object <- with(myelomatosis, Surv(DUR, STATUS))
-
-# Fit the survival curves and perform log-rank test
-surv_fit <- survfit(surv_object ~ TREAT, data = myelomatosis)
-log_rank_test <- survdiff(surv_object ~ TREAT, data = myelomatosis)
-print(log_rank_test)
+head(myelomatosis)
 ```
 
-    ## Call:
-    ## survdiff(formula = surv_object ~ TREAT, data = myelomatosis)
-    ## 
-    ##          N Observed Expected (O-E)^2/E (O-E)^2/V
-    ## TREAT=0 13        9     9.24   0.00610    0.0137
-    ## TREAT=1 12        8     7.76   0.00726    0.0137
-    ## 
-    ##  Chisq= 0  on 1 degrees of freedom, p= 0.9
+    ##   OBS  DUR STATUS TREAT
+    ## 1   1    8      1     1
+    ## 2   2  180      1     0
+    ## 3   3  632      1     0
+    ## 4   4  852      0     1
+    ## 5   5   52      1     1
+    ## 6   6 2240      0     0
 
 ``` r
-print(surv_fit)
-```
-
-    ## Call: survfit(formula = surv_object ~ TREAT, data = myelomatosis)
-    ## 
-    ##          n events median 0.95LCL 0.95UCL
-    ## TREAT=0 13      9    210      76      NA
-    ## TREAT=1 12      8    142      52      NA
-
-``` r
+#log-rank test
 print(survdiff(Surv(DUR, STATUS)~TREAT, data = myelomatosis),
 digits=5)
 ```
@@ -73,63 +56,55 @@ digits=5)
     ## survdiff(formula = Surv(DUR, STATUS) ~ TREAT, data = myelomatosis)
     ## 
     ##          N Observed Expected (O-E)^2/E (O-E)^2/V
-    ## TREAT=0 13        9   9.2373 0.0060982  0.013681
-    ## TREAT=1 12        8   7.7627 0.0072566  0.013681
+    ## TREAT=0 13       11   8.6624   0.63081    1.3126
+    ## TREAT=1 12        6   8.3376   0.65539    1.3126
     ## 
-    ##  Chisq= 0  on 1 degrees of freedom, p= 0.907
-
-``` r
-library(survival)
-fit = survfit(Surv(DUR, STATUS)~1, data = myelomatosis,
-conf.type="log-log")
-summary(fit)
-```
-
-    ## Call: survfit(formula = Surv(DUR, STATUS) ~ 1, data = myelomatosis, 
-    ##     conf.type = "log-log")
-    ## 
-    ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
-    ##     8     25       2    0.920  0.0543        0.716        0.979
-    ##    13     23       1    0.880  0.0650        0.673        0.960
-    ##    18     22       1    0.840  0.0733        0.628        0.937
-    ##    23     21       1    0.800  0.0800        0.584        0.911
-    ##    52     20       1    0.760  0.0854        0.542        0.884
-    ##    63     19       2    0.680  0.0933        0.461        0.825
-    ##    70     17       1    0.640  0.0960        0.422        0.794
-    ##    76     16       1    0.600  0.0980        0.384        0.761
-    ##   180     15       1    0.560  0.0993        0.348        0.727
-    ##   195     14       1    0.520  0.0999        0.312        0.692
-    ##   210     13       1    0.480  0.0999        0.278        0.656
-    ##   220     12       1    0.440  0.0993        0.245        0.619
-    ##   632     10       1    0.396  0.0986        0.208        0.579
-    ##   700      9       1    0.352  0.0970        0.174        0.537
-    ##  1296      7       1    0.302  0.0953        0.134        0.489
+    ##  Chisq= 1.3  on 1 degrees of freedom, p= 0.252
 
 ``` r
 library(ggsurvfit)
-survfit2(Surv(DUR, STATUS)~1, data = myelomatosis,
-conf.type="log-log") |>
-ggsurvfit() +
-add_confidence_interval()
+
+#plot
+survfit2(Surv(DUR, STATUS)~TREAT, data = myelomatosis) |> 
+  ggsurvfit() +
+  add_censor_mark() +
+  add_pvalue(location = "annotation", 
+             caption = "Log-rank {p.value}")
 ```
 
-![](homework_3_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](homework_3_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
-quantile(fit, probs=c(.25,.5,.75), conf.int=T)
+#K-M table
+
+km_table = survfit(Surv(DUR, STATUS) ~ TREAT, data = myelomatosis, conf.type = "log-log")
+
+summary(km_table)
 ```
 
-    ## $quantile
-    ##  25  50  75 
-    ##  63 210  NA 
+    ## Call: survfit(formula = Surv(DUR, STATUS) ~ TREAT, data = myelomatosis, 
+    ##     conf.type = "log-log")
     ## 
-    ## $lower
-    ##  25  50  75 
-    ##   8  63 220 
+    ##                 TREAT=0 
+    ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+    ##    13     13       1    0.923  0.0739       0.5664        0.989
+    ##    18     12       1    0.846  0.1001       0.5122        0.959
+    ##    23     11       1    0.769  0.1169       0.4421        0.919
+    ##    70     10       1    0.692  0.1280       0.3734        0.872
+    ##    76      9       1    0.615  0.1349       0.3083        0.818
+    ##   180      8       1    0.538  0.1383       0.2477        0.760
+    ##   195      7       1    0.462  0.1383       0.1916        0.696
+    ##   210      6       1    0.385  0.1349       0.1405        0.628
+    ##   632      5       1    0.308  0.1280       0.0950        0.554
+    ##   700      4       1    0.231  0.1169       0.0558        0.475
+    ##  1296      3       1    0.154  0.1001       0.0248        0.388
     ## 
-    ## $upper
-    ##   25   50   75 
-    ##  180 1296   NA
+    ##                 TREAT=1 
+    ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+    ##     8     12       2    0.833   0.108        0.482        0.956
+    ##    52     10       1    0.750   0.125        0.408        0.912
+    ##    63      9       2    0.583   0.142        0.270        0.801
+    ##   220      7       1    0.500   0.144        0.208        0.736
 
 2a. Generate a graph of the survival functions in the two hormone
 therapy groups using `hwdata1`. Interpret the graph. (hint: What do you
